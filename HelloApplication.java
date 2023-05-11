@@ -1,20 +1,16 @@
 package com.example.gui;
 
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.GridPane;
-import javafx.scene.text.Font;
 import javafx.stage.Stage;
-import org.controlsfx.control.spreadsheet.Grid;
-
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 
 public class HelloApplication extends Application {
     Stage primaryStage;
@@ -22,16 +18,20 @@ public class HelloApplication extends Application {
     int height = 450;
 
     UserLoginService service = new UserLoginService();
-    LoginController loginController = new LoginController(service);
+
+    NotebookController notebookController = new NotebookController(service);
 
     @Override
     public void start(Stage stage) throws IOException {
+
         this.primaryStage = stage;
+        LoginController loginController = new LoginController(service, primaryStage);
         primaryStage.setTitle("Students");
         primaryStage.setMinHeight(height);
         primaryStage.setMinWidth(width);
         primaryStage.setMaxHeight(height);
         primaryStage.setMaxWidth(width);
+        primaryStage.setResizable(false);
         primaryStage.setScene(loginController.setScene());
         primaryStage.show();
     }

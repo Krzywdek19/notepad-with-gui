@@ -2,21 +2,18 @@ package com.example.gui;
 
 import javafx.geometry.HPos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.control.TextFormatter;
-import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
-import javafx.scene.text.Text;
-import org.controlsfx.control.spreadsheet.Grid;
+import javafx.stage.Stage;
 
-import java.util.function.UnaryOperator;
 
 public class LoginController {
     UserLoginService service;
-    public LoginController(UserLoginService service){
+
+    Stage stage;
+    public LoginController(UserLoginService service, Stage stage){
+        this.stage = stage;
         this.service = service;
     }
 
@@ -39,14 +36,18 @@ public class LoginController {
         GridPane.setColumnSpan(loginInput, 2);
 
 
-        TextField passwordInput = new TextField();
+        PasswordField passwordInput = new PasswordField();
         passwordInput.setPromptText("Podaj hasło");
         passwordInput.setFont(Font.font(20));
         GridPane.setColumnSpan(passwordInput, 2);
 
+        Hyperlink hyperLink = new Hyperlink("Mam już konto");
+
         Button button = new Button("Zarejestruj się");
         GridPane.setHalignment(button, HPos.CENTER);
-        button.onActionProperty();
+
+        setActionOnButton(button, loginInput, passwordInput, service);
+        setActionOnHyperlink(hyperLink, title, button);
 
         GridSetter.setGridRowsWithSameHeight(GridSetter.setGridColumnsWithSameWidth(grid, 5), 8);
 
@@ -55,11 +56,11 @@ public class LoginController {
         GridPane.setConstraints(loginInput, 2, 3);
         GridPane.setConstraints(passwordLabel, 1, 4);
         GridPane.setConstraints(passwordInput, 2, 4);
+        GridPane.setConstraints(hyperLink,2,5 );
         GridPane.setConstraints(button, 2,6);
 
-        grid.getChildren().addAll(title,loginLabel,loginInput,passwordLabel,passwordInput,button);
+        grid.getChildren().addAll(title,loginLabel,loginInput,passwordLabel,passwordInput,button, hyperLink);
 
-        setActionOnButton(button, loginInput, passwordInput, service);
 
         return new Scene(grid);
     }
@@ -68,9 +69,32 @@ public class LoginController {
     private void setActionOnButton(Button btn, TextField login, TextField pass, UserLoginService service){
         btn.setOnAction(
                 e->{
-                    service.createAccount(login.getText(), pass.getText());
+                    if(service.handleAuthorization(login.getText(), pass.getText())){
+                        this.stage.setWidth(700);
+                        this.stage.setHeight(500);
+                        this.stage.setScene(new NotebookController(this.service).setScene());
+                    }
+                    btn.getParent().requestLayout();
                     login.clear();
                     pass.clear();
+                }
+        );
+    }
+
+    private void setActionOnHyperlink(Hyperlink hyperlink, Label heading, Button button){
+        hyperlink.setOnAction(
+                e->{
+                    if(this.service.isRegistrationScene()){
+                        heading.setText("Logowanie");
+                        hyperlink.setText("Nie mam konta");
+                        button.setText("Zaloguj się");
+                    }else {
+                        heading.setText("Rejestracja");
+                        hyperlink.setText("Mam już konto");
+                        button.setText("Zarejestruj się");
+                    }
+                    this.service.setRegistrationScene(!this.service.isRegistrationScene());
+                    hyperlink.getParent().requestLayout();
                 }
         );
     }

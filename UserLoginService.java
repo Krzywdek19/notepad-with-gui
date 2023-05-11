@@ -1,10 +1,45 @@
 package com.example.gui;
 
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.stage.Stage;
+
 import java.io.*;
+import java.security.Provider;
 
 public class UserLoginService {
     private String fileName = "accounts";
-    private boolean isLogged = false;
+    private Boolean isLogged = false;
+
+
+    private boolean registrationScene = true;
+
+    private String username = "";
+
+    public Boolean isLogged() {
+        return isLogged;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public boolean isRegistrationScene() {
+        return registrationScene;
+    }
+
+    public void setRegistrationScene(boolean registrationScene) {
+        this.registrationScene = registrationScene;
+    }
 
     public UserLoginService() {
         File file = new File(fileName);
@@ -14,6 +49,15 @@ public class UserLoginService {
             } catch (IOException e) {
                 System.out.println("Wystąpił problem podczas tworzenia pliku");
             }
+        }
+    }
+
+    public boolean handleAuthorization(String login, String password){
+        if(this.registrationScene){
+            this.createAccount(login,password);
+            return false;
+        }else {
+            return this.login(login, password);
         }
     }
 
@@ -39,6 +83,8 @@ public class UserLoginService {
                 String[] loginData = reader.readLine().split("\\|");
                 if (loginData[0].equals(login)) {
                     if (loginData[1].equals(password)) {
+                        this.isLogged = true;
+                        this.setUsername(login);
                         return true;
                     } else {
                         System.out.println("Podane hasło jest nieprawidłowe");
